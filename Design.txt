@@ -1,0 +1,16 @@
+#Full Stack Nanodegree Project 4 Refresh
+
+##Hangman
+The design I used was based on the original Guess-a-Number framework with
+some additional modifications. In particular, the logic of the game was 
+completely re-written for Hangman, but the logic is still contained within
+the same 'make_move' method.
+
+An additional 'prev_guesses' parameter had to be added to 'Game' class
+in order to track previous guesses that had been made. An alternative to
+this structure was to make an entirely separate class and ndb model to
+track previous guesses, but it seemed much cleaner to simply track guesses
+within the Game object itself using the ndb.JsonProperty type.
+
+Rather than sending an email to every user every hour, I modified the cron
+job to only send users with active games reminders.
