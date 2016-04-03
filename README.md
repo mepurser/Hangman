@@ -1,4 +1,4 @@
-#Full Stack Nanodegree Project 4 Refresh
+# Full Stack Nanodegree Project 4 Refresh
 
 ##Game Description:
 Hangman is a simple word guessing game. Each game begins with an 'answer'
@@ -62,14 +62,6 @@ this number has been preserved.
     - Parameters: None
     - Returns: ScoreForms.
     - Description: Returns all Scores in the database (unordered).
-    
- - **get_user_scores**
-    - Path: 'scores/user/{user_name}'
-    - Method: GET
-    - Parameters: user_name
-    - Returns: ScoreForms. 
-    - Description: Returns all Scores recorded by the provided player (unordered).
-    Will raise a NotFoundException if the User does not exist.
     
  - **get_active_game_count**
     - Path: 'games/active'

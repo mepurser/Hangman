@@ -1,7 +1,3 @@
-"""models.py - This file contains the class definitions for the Datastore
-entities used by the Game. Because these classes are also regular Python
-classes they can include methods (such as 'to_form' and 'new_game')."""
-
 import random
 from datetime import date
 from protorpc import messages
@@ -11,26 +7,28 @@ from google.appengine.ext import ndb
 class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
-    email =ndb.StringProperty()
+    email = ndb.StringProperty()
     rating = ndb.IntegerProperty()
 
     def to_form(self):
-        return RankingForm(user_name=self.name, 
+        return RankingForm(user_name=self.name,
                            rating=self.rating)
 
     def update_rating(self, games):
-        """Creates a player rating normalizing the number of games"""
-        """Golf rules: lower the score the better"""
-        """There is an additional 3 point penalty for games lost"""
-        """Players with no games won are unrated with rating -1"""
+        """
+        Creates a player rating normalizing the number of games
+        Golf rules: lower the score the better
+        There is an additional 3 point penalty for games lost
+        Players with no games won are unrated with rating -1
+        """
         guesses = 0
         gamesWon = 0
         gamesLost = 0
         for game in games:
             guesses = guesses + game.attempts_allowed - game.attempts_remaining
             if game.game_over and not game.cancelled and \
-                game.attempts_remaining > 0:
-                    gamesWon = gamesWon + 1
+                    game.attempts_remaining > 0:
+                gamesWon = gamesWon + 1
             if game.attempts_remaining == game.attempts_allowed:
                 gamesLost = gamesLost + 1
 
@@ -45,7 +43,7 @@ class Game(ndb.Model):
     """Game object"""
     answer = ndb.StringProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
-    attempts_remaining = ndb.IntegerProperty(required=True, default=5)
+    attempts_remaining = ndb.IntegerProperty(required=True)
     game_over = ndb.BooleanProperty(required=True, default=False)
     cancelled = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
@@ -89,8 +87,9 @@ class Game(ndb.Model):
         form = HistoryForm()
         form.urlsafe_key = self.key.urlsafe()
         form.user_name = self.user.get().name
-        form.prev_guesses = GuessListForms( \
-            items=[self.to_prevguesses_form(guess) for guess in self.prev_guesses])
+        form.prev_guesses = GuessListForms(
+            items=[self.to_prevguesses_form(guess)
+                   for guess in self.prev_guesses])
         return form
 
     def to_prevguesses_form(self, guess):
@@ -155,7 +154,7 @@ class NewGameForm(messages.Message):
     answer_word = messages.StringField(2, required=True)
     # in Hangman, the total attempts is usually fixed, (by
     # the number of lines to draw the hanging) but the user
-    # is allowed to specify the attempts here anyways. 
+    # is allowed to specify the attempts here anyways.
     attempts = messages.IntegerField(3, default=9)
 
 

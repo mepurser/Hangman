@@ -23,9 +23,11 @@ MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),)
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
-LIST_REQUEST = endpoints.ResourceContainer(number_of_results=messages.IntegerField(1))
+LIST_REQUEST = endpoints.ResourceContainer(
+    number_of_results=messages.IntegerField(1))
 
 MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
+
 
 @endpoints.api(name='hangman', version='v1')
 class HangmanApi(remote.Service):
@@ -142,7 +144,7 @@ class HangmanApi(remote.Service):
 
         if game.attempts_remaining < 1:
             game.end_game(False)
-            return game.to_form(msg + ' Game over!')
+            return game.to_form('Game over!')
         else:
             game.put()
             return game.to_form(msg)
@@ -155,27 +157,14 @@ class HangmanApi(remote.Service):
         """Return all scores"""
         return ScoreForms(items=[score.to_form() for score in Score.query()])
 
-    @endpoints.method(request_message=USER_REQUEST,
-                      response_message=ScoreForms,
-                      path='scores/user/{user_name}',
-                      name='get_user_scores',
-                      http_method='GET')
-    def get_user_scores(self, request):
-        """Returns all of an individual User's scores"""
-        user = User.query(User.name == request.user_name).get()
-        if not user:
-            raise endpoints.NotFoundException(
-                    'A User with that name does not exist!')
-        scores = Score.query(Score.user == user.key)
-        return ScoreForms(items=[score.to_form() for score in scores])
-
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
                       name='get_average_attempts_remaining',
                       http_method='GET')
     def get_average_attempts(self, request):
         """Get the cached average moves remaining"""
-        return StringMessage(message=memcache.get(MEMCACHE_MOVES_REMAINING) or '')
+        return StringMessage(message=memcache.get(
+            MEMCACHE_MOVES_REMAINING) or '')
 
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=GameForms,
@@ -223,12 +212,13 @@ class HangmanApi(remote.Service):
                       name='get_user_rankings',
                       http_method='GET')
     def get_user_rankings(self, request):
+        """Get rankings of all users"""
         users = User.query()
         for user in users:
-            user_games = Game.query(Game.user == user.key, Game.game_over == True)
+            user_games = Game.query(Game.user == user.key,
+                                    Game.game_over == True)
             user.update_rating(user_games)
         return RankingForms(items=[user.to_form() for user in users])
-
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=HistoryForm,
@@ -236,9 +226,9 @@ class HangmanApi(remote.Service):
                       name='get_game_history',
                       http_method='GET')
     def get_game_history(self, request):
+        """Get previous guesses of a particular game"""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         return game.to_history_form()
-
 
     @staticmethod
     def _cache_average_attempts():
@@ -247,10 +237,11 @@ class HangmanApi(remote.Service):
         if games:
             count = len(games)
             total_attempts_remaining = sum([game.attempts_remaining
-                                        for game in games])
+                                           for game in games])
             average = float(total_attempts_remaining)/count
             memcache.set(MEMCACHE_MOVES_REMAINING,
-                         'The average moves remaining is {:.2f}'.format(average))
+                         'The average moves remaining is {:.2f}'
+                         .format(average))
 
 
 api = endpoints.api_server([HangmanApi])
